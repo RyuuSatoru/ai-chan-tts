@@ -1,0 +1,92 @@
+[
+    {
+        "question": "Question 1: What is the hiragana for 'a'?",
+        "options": ["あ", "い", "う", "え"],
+        "answer": 0,
+        "level": "N5"
+    },
+    {
+        "question": "Question 2: What is the kanji for 'water'?",
+        "options": ["火", "水", "木", "金"],
+        "answer": 1,
+        "level": "N5"
+    },
+    {
+        "question": "Question 3: What is the meaning of the word '猫'?",
+        "options": ["Dog", "Cat", "Bird", "Fish"],
+        "answer": 1,
+        "level": "N5"
+    },
+    {
+        "question": "Question 4: How do you say 'thank you' in Japanese?",
+        "options": ["こんにちは", "ありがとう", "さようなら", "おはよう"],
+        "answer": 1,
+        "level": "N5"
+    },
+    {
+        "question": "Question 5: What is the meaning of the word '勉強'?",
+        "options": ["Work", "Study", "Play", "Rest"],
+        "answer": 1,
+        "level": "N4"
+    },
+    {
+        "question": "Question 6: What is the kanji for 'tree'?",
+        "options": ["木", "水", "火", "金"],
+        "answer": 0,
+        "level": "N4"
+    },
+    {
+        "question": "Question 7: How do you say 'good morning' in Japanese?",
+        "options": ["こんばんは", "おはよう", "おやすみ", "こんにちは"],
+        "answer": 1,
+        "level": "N4"
+    },
+    {
+        "question": "Question 8: What is the meaning of the word '図書館'?",
+        "options": ["Library", "School", "Office", "Store"],
+        "answer": 0,
+        "level": "N3"
+    },
+    {
+        "question": "Question 9: What is the kanji for 'love'?",
+        "options": ["好き", "愛", "情", "恋"],
+        "answer": 1,
+        "level": "N3"
+    },
+    {
+        "question": "Question 10: How do you say 'good night' in Japanese?",
+        "options": ["おはよう", "こんにちは", "おやすみ", "ありがとう"],
+        "answer": 2,
+        "level": "N3"
+    },
+    {
+        "question": "Question 11: What is the meaning of the word '経済'?",
+        "options": ["Economy", "Politics", "History", "Geography"],
+        "answer": 0,
+        "level": "N2"
+    },
+    {
+        "question": "Question 12: What is the kanji for 'mountain'?",
+        "options": ["川", "山", "海", "森"],
+        "answer": 1,
+        "level": "N2"
+    },
+    {
+        "question": "Question 13: How do you say 'excuse me' in Japanese?",
+        "options": ["すみません", "いいえ", "ありがとう", "おねがいします"],
+        "answer": 0,
+        "level": "N2"
+    },
+    {
+        "question": "Question 14: What is the meaning of the word '哲学'?",
+        "options": ["Mathematics", "Science", "Philosophy", "Literature"],
+        "answer": 2,
+        "level": "N1"
+    },
+    {
+        "question": "Question 15: What is the kanji for 'dream'?",
+        "options": ["夢", "光", "星", "空"],
+        "answer": 0,
+        "level": "N1"
+    }
+]
