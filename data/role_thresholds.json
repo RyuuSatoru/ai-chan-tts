@@ -1,0 +1,17 @@
+{
+    "beginner": {
+        "role_name": "Sơ cấp",
+        "min_score": 0,
+        "max_score": 5
+    },
+    "intermediate": {
+        "role_name": "Trung cấp",
+        "min_score": 6,
+        "max_score": 10
+    },
+    "advanced": {
+        "role_name": "Cao cấp",
+        "min_score": 11,
+        "max_score": 15
+    }
+}
