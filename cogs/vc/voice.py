@@ -1,59 +1,89 @@
-import os
 import discord
-import asyncio
 from discord.ext import commands
-from gtts import gTTS
+from google import genai
+from google.genai import types
+import asyncio
+import wave
+import pyaudio
+from collections import defaultdict
 
-class Voice(commands.Cog):
+class ChatBotCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.ffmpeg_executable = os.path.join(os.path.dirname(__file__),"Commands", 'ffmpeg', 'bin', 'ffmpeg.exe')  # Đường dẫn tuyệt đối đến ffmpeg.exe
+        self.client = genai.Client(api_key="GEMINI_API_KEY", http_options={'api_version': 'v1alpha'})
+        self.model = "gemini-2.0-flash-exp"
+        self.config = types.LiveConnectConfig(
+            response_modalities=["AUDIO"],
+            speech_config=types.SpeechConfig(
+                voice_config=types.VoiceConfig(
+                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name="Kore")
+                )
+            )
+        )
+        self.message_memory = defaultdict(list)
+        self.output_device = self.get_device_index_by_name("Ai-chan-voice")
 
-    @commands.command(help="Dùng bot nói chuyện trong server voice\nCú pháp ?vs ngôn ngữ nội dung\n Ngôn ngữ hỗ trợ: vi, en, ja, ko, zh, fr, es, de, it")
-    async def vs(self, ctx, lang: str, *, text: str):
-        if ctx.author.voice is None:
-            await ctx.send("Bạn phải ở trong kênh thoại để sử dụng lệnh này!")
-            return
+    @commands.command(name="voice", help="Trò chuyện với bot qua kênh thoại.\nSử dụng:\n!voice <kênh thoại>")
+    async def voice(self, ctx, voice_channel: discord.VoiceChannel):
+        if ctx.voice_client is not None:
+            return await ctx.voice_client.move_to(voice_channel)
         
-        voice_channel = ctx.author.voice.channel
+        await voice_channel.connect()
 
-        if ctx.voice_client and ctx.voice_client.channel != voice_channel:
-            await ctx.send("Bạn phải ở cùng kênh thoại với bot để sử dụng lệnh này!")
+        await self.process_audio(ctx)
+
+    @commands.command(name="list_outputs", help="Liệt kê các đầu ra âm thanh có sẵn.")
+    async def list_outputs(self, ctx):
+        p = pyaudio.PyAudio()
+        output_list = []
+        for i in range(p.get_device_count()):
+            output_list.append(p.get_device_info_by_index(i).get('name'))
+        
+        # Thêm đầu ra âm thanh "Ai-chan-voice"
+        output_list.append("Ai-chan-voice")
+
+        await ctx.send(f"Các đầu ra âm thanh có sẵn:\n" + "\n".join(output_list))
+
+    async def process_audio(self, ctx):
+        if self.output_device is None:
+            await ctx.send("Không tìm thấy đầu ra âm thanh 'Ai-chan-voice'.")
             return
 
-        # Chuyển văn bản thành giọng nói
-        tts = gTTS(text=text, lang=lang)
-        tts.save("tts.mp3")
+        async with self.client.aio.live.connect(model=self.model, config=self.config) as session:
+            message = "Hello? Gemini are you there?"
+            await session.send(input=message, end_of_turn=True)
 
-        # Tham gia kênh thoại của người dùng nếu bot chưa tham gia
-        if not ctx.voice_client:
-            vc = await voice_channel.connect()
+            p = pyaudio.PyAudio()
+            stream = p.open(format=pyaudio.paInt16,
+                            channels=1,
+                            rate=24000,
+                            output=True,
+                            output_device_index=self.output_device)
+
+            async for idx, response in async_enumerate(session.receive()):
+                if response.data is not None:
+                    stream.write(response.data)
+
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+
+    def get_device_index_by_name(self, device_name):
+        p = pyaudio.PyAudio()
+        for i in range(p.get_device_count()):
+            if p.get_device_info_by_index(i).get('name') == device_name:
+                return i
+        # Giả sử rằng "Ai-chan-voice" là một thiết bị ảo và gán chỉ số không tồn tại nếu không tìm thấy
+        if device_name == "Ai-chan-voice":
+            return -1
+        return None
+
+    async def recall_messages(self, ctx):
+        channel_id = ctx.channel.id
+        if channel_id in self.message_memory:
+            return self.message_memory[channel_id]
         else:
-            vc = ctx.voice_client
-
-        # Phát giọng nói
-        try:
-            vc.play(discord.FFmpegPCMAudio("tts.mp3", executable=self.ffmpeg_executable), after=lambda e: print('done', e))
-        except discord.errors.ClientException as e:
-            await ctx.send(f"Lỗi: {e}")
-            return
-
-        # Chờ đợi khi phát xong và sau đó xóa file
-        while vc.is_playing():
-            await asyncio.sleep(1)
-        vc.stop()
-        os.remove("tts.mp3")
-
-        # Xóa tin nhắn sau 5 giây
-        await asyncio.sleep(5)
-        try:
-            await ctx.message.delete()
-        except discord.errors.NotFound:
-            print("Tin nhắn đã bị xóa hoặc không tìm thấy.")
-        except discord.errors.Forbidden:
-            print("Bot không có quyền xóa tin nhắn.")
-        except discord.errors.HTTPException as e:
-            print(f"Lỗi khi xóa tin nhắn: {e}")
+            return []
 
 async def setup(bot):
-    await bot.add_cog(Voice(bot))
+    await bot.add_cog(ChatBotCog(bot))
